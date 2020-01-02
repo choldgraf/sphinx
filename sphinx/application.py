@@ -856,13 +856,14 @@ class Sphinx:
                       RemovedInSphinx40Warning, stacklevel=2)
         self.add_js_file(filename, **kwargs)
 
-    def add_js_file(self, filename: str, **kwargs: str) -> None:
+    def add_js_file(self, filename: str, body: str, **kwargs: str) -> None:
         """Register a JavaScript file to include in the HTML output.
 
         Add *filename* to the list of JavaScript files that the default HTML
         template will include.  The filename must be relative to the HTML
-        static path , or a full URI with scheme.  The keyword arguments are
-        also accepted for attributes of ``<script>`` tag.
+        static path , or a full URI with scheme.  If filename is None, then place
+        the value of *body* between the ``<script></script>`` tags in the output.
+        Remaining keyword arguments define extra attributes of the ``<script>`` tag.
 
         Example::
 
@@ -871,6 +872,9 @@ class Sphinx:
 
             app.add_js_file('example.js', async="async")
             # => <script src="_static/example.js" async="async"></script>
+
+            app.add_js_file(None, body="var myvariable = 'foo';")
+            # => <script>var myvariable = "foo";</script>
 
         .. versionadded:: 0.5
 
