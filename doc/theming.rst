@@ -20,6 +20,10 @@ the theme's look and feel.
 Themes are meant to be project-unaware, so they can be used for different
 projects without change.
 
+.. note::
+
+    See :ref:`dev-extensions` for more information that may
+    be helpful in developing themes.
 
 Creating themes
 ---------------

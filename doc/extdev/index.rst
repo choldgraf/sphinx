@@ -189,6 +189,89 @@ as metadata of the extension.  Metadata keys currently recognized are:
   usually don't negatively influence the process, this defaults to ``True``.
 
 
+Extension How-tos
+-----------------
+
+This section contains several how-tos associated with developing extensions in
+Sphinx.
+
+Defining custom template functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sometimes it is useful to define your own function in Python that you wish to
+then use in a template. For example, if you'd like to insert a template value
+with logic that depends on the user's configuration in the site, or if you'd
+like to include non-trivial checks and provide friendly error messages for
+incorrect configuration in the template.
+
+To define your own template function, you'll need to define two functions inside
+your module, a **parent function** and a **template function**.
+
+First, define the **parent function**, which accepts the
+arguments for :event:`html-page-context`.
+
+Within the parent function, define
+the **template function** that you'd like to use within Jinja. The template function
+should return a string or docutils object that Sphinx uses in the templating process
+(it will have access to all of the variables that are passed to the parent function).
+
+At the end of the parent function, add the **template function** to the Sphinx
+application's context with ``context['my_func'] = my_func``.
+
+Finally, in your main ``setup`` function, add your custom setup function
+as a callback for :event:`html-page-context`.
+
+.. code:: python
+
+   # The parent function
+   def setup_my_func(app, pagename, templatename, context, doctree):
+
+      # Define the template function
+      def my_func(mystring):
+          return "Your string is %s" % mystring
+
+      # Add it to the page's context
+      context['my_func'] = my_func
+
+   # Your extension's setup function
+   def setup(app):
+      app.connect("html-page-context", setup_my_func)
+
+Now, you will have access to this function in jinja like so:
+
+.. code:: jinja
+
+   <div>
+   {{ my_func("some string") }}
+   </div>
+
+Make an extension depend on another extension
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sometimes your extension depends on the functionality of another
+Sphinx extension. Most Sphinx extensions are activated in a
+site's :file:`conf.py` file, but this is not available to you as an extension
+developer.
+
+.. module:: sphinx.application
+
+To ensure that another extension is activated as a part of your own extension,
+use the :meth:`Sphinx.setup_extension` method. This will
+activate another extension at run-time, ensuring that you have access to its
+functionality.
+
+For example, the following code activates the "recommonmark" extension:
+
+.. code:: python
+
+   def setup(app):
+      app.setup_extension("recommonmark")
+
+.. note::
+
+   Since your extension will depend on another, make sure to include it as a part
+   of your extension's installation requirements.
+
 APIs used for writing extensions
 --------------------------------
 
